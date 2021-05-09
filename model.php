@@ -1,0 +1,162 @@
+<?php 
+global $pdo;
+
+
+// CONNECT TO MySQL and DATABASE
+function db_connect(){
+    global $pdo;
+    $pdo = null;
+    $servername = "localhost";
+    $username = "admin";
+    $password = "root";
+    $db_name = "test";
+
+try {
+  $pdo = new PDO("mysql:host=$servername;dbname=$db_name", $username, $password);
+  // set the PDO error mode to exception
+  $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch(PDOException $e) {
+  echo "Connection failed: " . $e->getMessage();
+}
+}
+
+// CREATE - POST
+function post($email, $firstname, $lastname, $password, $phone){
+    db_connect();
+    global $pdo;
+    $stmt = $pdo->prepare("INSERT INTO Users (email, firstname, lastname, password, phone, reg_date) VALUES (:email, :firstname, :lastname, :password, :phone, NOW())");
+    $stmt->bindParam(':email', $email);
+    $stmt->bindParam(':firstname', $firstname);
+    $stmt->bindParam(':lastname', $lastname);
+    $stmt->bindParam(':password', $password);
+    $stmt->bindParam(':phone', $phone);
+    $done = $stmt->execute();
+    $pdo=null;
+    return $done;
+}
+
+// READ ALL - GET ALL
+function getAll($table='users'){
+db_connect();
+global $pdo;
+$sql = sprintf("SELECT * FROM %s", $table);
+$stmt = $pdo->prepare($sql);
+$stmt->execute();
+$result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+$data = $stmt->fetchAll();
+$dpo = null;
+return $data;
+}
+
+// READ ONE - GET ONE
+function get1($table, $id){
+  db_connect();
+  global $pdo;
+  $stmt = $pdo->prepare("SELECT * FROM $table WHERE id=:id");
+  $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+  $stmt->execute();
+  $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+  $data = $stmt->fetchAll();
+  $pdo = null;
+  return json_encode($data);
+}
+
+//DELETE
+function delete1($table, $id){
+  db_connect();
+  global $pdo;
+  $stmt = $pdo->prepare("DELETE FROM $table WHERE id=:id");
+  $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+  $stmt->execute();
+  $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+  $data = $stmt->fetchAll();
+  $pdo = null;
+  return 'DELETED';
+}
+
+
+// GET BY FIRST NAME
+function getName($table, $name){
+db_connect();
+global $pdo;
+$stmt = $pdo->prepare("SELECT * FROM $table WHERE firstname=:firstname");
+$stmt->bindValue(":firstname", $name);
+$stmt->execute();
+$result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
+$data = $stmt->fetchAll();
+return json_encode($data);
+$dpo = null;
+}
+
+//PUT - UPDATE
+function update($id, $email, $firstname, $lastname, $password, $phone){
+    db_connect();
+    global $pdo;
+    $sql = "UPDATE users SET
+    email = :email,
+    firstname = :firstname,
+    lastname = :lastname,
+    password = :password,
+    phone = :phone 
+    WHERE id=:id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':email', $email);
+    $stmt->bindParam(':firstname', $firstname);
+    $stmt->bindParam(':lastname', $lastname);
+    $stmt->bindParam(':password', $password);
+    $stmt->bindParam(':phone', $phone);
+    $stmt->bindParam(':id', $id,  PDO::PARAM_INT);
+    $done = $stmt->execute();
+    $pdo=null;
+    return $done;
+}
+
+
+
+function create_table(){
+  db_connect();
+  global $pdo;
+  $sql = "CREATE TABLE users (
+  id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(50) UNIQUE KEY NOT NULL,
+  firstname VARCHAR(30) NOT NULL,
+  lastname VARCHAR(30) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  phone VARCHAR(30) UNIQUE KEY NOT NULL,
+  reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  )";
+  $pdo->exec($sql);
+  echo "Table MyGuests created successfully";
+}
+
+
+function sql_connect(){
+    global $conn;
+    $servername = "localhost";
+    $username = "admin";
+    $password = "root";
+
+try {
+  $conn = new PDO("mysql:host=$servername", $username, $password);
+  // set the PDO error mode to exception
+  $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+  echo "MySQL connection SUCCESFUL<br>";
+} catch(PDOException $e) {
+  echo "Connection failed: " . $e->getMessage();
+}
+}
+
+function db_create($dbname = 'exemple'){
+    sql_connect();
+    global $conn;
+    $stmt = $conn->prepare("CREATE DATABASE ?");
+    $stmt->bindParam(1, $dbname);
+    $stmt->execute();
+    $conn=null;
+    echo "DATABASE CREATED";
+}
+
+
+
+
+?>
