@@ -45,7 +45,7 @@ $stmt->execute();
 $result = $stmt->setFetchMode(PDO::FETCH_ASSOC);
 $data = $stmt->fetchAll();
 $dpo = null;
-return $data;
+return json_encode($data);
 }
 
 // READ ONE - GET ONE
@@ -110,53 +110,5 @@ function update($id, $email, $firstname, $lastname, $password, $phone){
     $pdo=null;
     return $done;
 }
-
-
-
-function create_table(){
-  db_connect();
-  global $pdo;
-  $sql = "CREATE TABLE users (
-  id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  email VARCHAR(50) UNIQUE KEY NOT NULL,
-  firstname VARCHAR(30) NOT NULL,
-  lastname VARCHAR(30) NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  phone VARCHAR(30) UNIQUE KEY NOT NULL,
-  reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-  )";
-  $pdo->exec($sql);
-  echo "Table MyGuests created successfully";
-}
-
-
-function sql_connect(){
-    global $conn;
-    $servername = "localhost";
-    $username = "admin";
-    $password = "root";
-
-try {
-  $conn = new PDO("mysql:host=$servername", $username, $password);
-  // set the PDO error mode to exception
-  $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-  echo "MySQL connection SUCCESFUL<br>";
-} catch(PDOException $e) {
-  echo "Connection failed: " . $e->getMessage();
-}
-}
-
-function db_create($dbname = 'exemple'){
-    sql_connect();
-    global $conn;
-    $stmt = $conn->prepare("CREATE DATABASE ?");
-    $stmt->bindParam(1, $dbname);
-    $stmt->execute();
-    $conn=null;
-    echo "DATABASE CREATED";
-}
-
-
-
 
 ?>

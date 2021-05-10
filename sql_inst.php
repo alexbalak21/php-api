@@ -1,5 +1,5 @@
 <?php
-
+require_once ("model.php");
 //CREATE TABLE
 function create_table(){
   db_connect();
